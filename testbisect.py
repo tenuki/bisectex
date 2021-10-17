@@ -2,16 +2,15 @@ import sys
 import unittest
 from collections import UserList
 
-
 import bisect as py_bisect
 from decimal import Decimal
 
 import bisectex as main_bisect
 
 
-
 class Range(object):
     """A trivial range()-like object that has an insert() method."""
+
     def __init__(self, start, stop):
         self.start = start
         self.stop = stop
@@ -32,7 +31,8 @@ class Range(object):
         self.last_insert = idx, item
 
     def __repr__(self):
-        return '<%d-%d>'%(self.start, self.stop)
+        return '<%d-%d>' % (self.start, self.stop)
+
 
 class TestBisect:
     def setUp(self):
@@ -76,7 +76,6 @@ class TestBisect:
             (self.module.bisect_right, [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], 3.5, 6),
             (self.module.bisect_right, [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], 4, 10),
             (self.module.bisect_right, [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], 5, 10),
-
             (self.module.bisect_left, [], 1, 0),
             (self.module.bisect_left, [1], 0, 0),
             (self.module.bisect_left, [1], 1, 0),
@@ -135,21 +134,21 @@ class TestBisect:
         # Issue 13496
         mod = self.module
         n = sys.maxsize
-        data = range(n-1)
-        self.assertEqual(mod.bisect_left(data, n-3), n-3)
-        self.assertEqual(mod.bisect_right(data, n-3), n-2)
-        self.assertEqual(mod.bisect_left(data, n-3, n-10, n), n-3)
-        self.assertEqual(mod.bisect_right(data, n-3, n-10, n), n-2)
+        data = range(n - 1)
+        self.assertEqual(mod.bisect_left(data, n - 3), n - 3)
+        self.assertEqual(mod.bisect_right(data, n - 3), n - 2)
+        self.assertEqual(mod.bisect_left(data, n - 3, n - 10, n), n - 3)
+        self.assertEqual(mod.bisect_right(data, n - 3, n - 10, n), n - 2)
 
     def test_large_pyrange(self):
         # Same as above, but without C-imposed limits on range() parameters
         mod = self.module
         n = sys.maxsize
-        data = Range(0, n-1)
-        self.assertEqual(mod.bisect_left(data, n-3), n-3)
-        self.assertEqual(mod.bisect_right(data, n-3), n-2)
-        self.assertEqual(mod.bisect_left(data, n-3, n-10, n), n-3)
-        self.assertEqual(mod.bisect_right(data, n-3, n-10, n), n-2)
+        data = Range(0, n - 1)
+        self.assertEqual(mod.bisect_left(data, n - 3), n - 3)
+        self.assertEqual(mod.bisect_right(data, n - 3), n - 2)
+        self.assertEqual(mod.bisect_left(data, n - 3, n - 10, n), n - 3)
+        self.assertEqual(mod.bisect_right(data, n - 3, n - 10, n), n - 2)
         x = n - 100
         mod.insort_left(data, x, x - 50, x + 50)
         self.assertEqual(data.last_insert, (x, x))
@@ -162,23 +161,23 @@ class TestBisect:
         for i in range(n):
             data = [randrange(0, n, 2) for j in range(i)]
             data.sort()
-            elem = randrange(-1, n+1)
+            elem = randrange(-1, n + 1)
             ip = self.module.bisect_left(data, elem)
             if ip < len(data):
                 self.assertTrue(elem <= data[ip])
             if ip > 0:
-                self.assertTrue(data[ip-1] < elem)
+                self.assertTrue(data[ip - 1] < elem)
             ip = self.module.bisect_right(data, elem)
             if ip < len(data):
                 self.assertTrue(elem < data[ip])
             if ip > 0:
-                self.assertTrue(data[ip-1] <= elem)
+                self.assertTrue(data[ip - 1] <= elem)
 
     def test_optionalSlicing(self):
         for func, data, elem, expected in self.precomputedCases:
             for lo in range(4):
                 lo = min(len(data), lo)
-                for hi in range(3,8):
+                for hi in range(3, 8):
                     hi = min(len(data), hi)
                     ip = func(data, elem, lo, hi)
                     try:
@@ -189,11 +188,11 @@ class TestBisect:
                     if func is self.module.bisect_left and ip < hi:
                         self.assertTrue(elem <= data[ip])
                     if func is self.module.bisect_left and ip > lo:
-                        self.assertTrue(data[ip-1] < elem)
+                        self.assertTrue(data[ip - 1] < elem)
                     if func is self.module.bisect_right and ip < hi:
                         self.assertTrue(elem < data[ip])
                     if func is self.module.bisect_right and ip > lo:
-                        self.assertTrue(data[ip-1] <= elem)
+                        self.assertTrue(data[ip - 1] <= elem)
                     self.assertEqual(ip, max(lo, min(hi, expected)))
 
     def test_backcompatibility(self):
@@ -215,18 +214,17 @@ class TestBisect:
         # Invariant: Index with a keyfunc on an array
         # should match the index on an array where
         # key function has already been applied.
-
         keyfunc = abs
         arr = sorted([2, -4, 6, 8, -10], key=keyfunc)
         precomputed_arr = list(map(keyfunc, arr))
         for x in precomputed_arr:
             self.assertEqual(
-                mod.bisect_left(arr, x, key=keyfunc),
-                mod.bisect_left(precomputed_arr, x)
+                    mod.bisect_left(arr, x, key=keyfunc),
+                    mod.bisect_left(precomputed_arr, x)
             )
             self.assertEqual(
-                mod.bisect_right(arr, x, key=keyfunc),
-                mod.bisect_right(precomputed_arr, x)
+                    mod.bisect_right(arr, x, key=keyfunc),
+                    mod.bisect_right(precomputed_arr, x)
             )
 
         keyfunc = str.casefold
@@ -234,12 +232,12 @@ class TestBisect:
         precomputed_arr = list(map(keyfunc, arr))
         for x in precomputed_arr:
             self.assertEqual(
-                mod.bisect_left(arr, x, key=keyfunc),
-                mod.bisect_left(precomputed_arr, x)
+                    mod.bisect_left(arr, x, key=keyfunc),
+                    mod.bisect_left(precomputed_arr, x)
             )
             self.assertEqual(
-                mod.bisect_right(arr, x, key=keyfunc),
-                mod.bisect_right(precomputed_arr, x)
+                    mod.bisect_right(arr, x, key=keyfunc),
+                    mod.bisect_right(precomputed_arr, x)
             )
 
     def _test_insort(self):
@@ -255,24 +253,27 @@ class TestBisect:
         for x in data:
             mod.insort_left(target, x, key=keyfunc)
             self.assertEqual(
-                sorted(target, key=keyfunc),
-                target
+                    sorted(target, key=keyfunc),
+                    target
             )
         target = []
         for x in data:
             mod.insort_right(target, x, key=keyfunc)
             self.assertEqual(
-                sorted(target, key=keyfunc),
-                target
+                    sorted(target, key=keyfunc),
+                    target
             )
+
 
 class TestBisectPython(TestBisect, unittest.TestCase):
     module = py_bisect
 
+
 class TestBisect_Main(TestBisect, unittest.TestCase):
     module = main_bisect
 
-#==============================================================================
+
+# ==============================================================================
 
 class TestInsort:
     def test_vsBuiltinSort(self, n=500):
@@ -293,41 +294,51 @@ class TestInsort:
     def test_listDerived(self):
         class List(list):
             data = []
+
             def insert(self, index, item):
                 self.data.insert(index, item)
-
         lst = List()
         self.module.insort_left(lst, 10)
         self.module.insort_right(lst, 5)
         self.assertEqual([5, 10], lst.data)
 
+
 class TestInsortPython(TestInsort, unittest.TestCase):
     module = py_bisect
+
 
 class TestInsortMain(TestInsort, unittest.TestCase):
     module = main_bisect
 
-#==============================================================================
+
+# ==============================================================================
 
 class LenOnly:
     "Dummy sequence class defining __len__ but not __getitem__."
+
     def __len__(self):
         return 10
 
+
 class GetOnly:
     "Dummy sequence class defining __getitem__ but not __len__."
+
     def __getitem__(self, ndx):
         return 10
 
+
 class CmpErr:
     "Dummy element that always raises an error during comparison"
+
     def __lt__(self, other):
         raise ZeroDivisionError
+
     __gt__ = __lt__
     __le__ = __lt__
     __ge__ = __lt__
     __eq__ = __lt__
     __ne__ = __lt__
+
 
 class TestErrorHandling:
     def test_non_sequence(self):
@@ -356,13 +367,14 @@ class TestErrorHandling:
                   self.module.insort_left, self.module.insort_right):
             self.assertRaises(TypeError, f, 10)
 
+
 class TestErrorHandlingPython(TestErrorHandling, unittest.TestCase):
     module = py_bisect
+
 
 class TestErrorHandlingMain(TestErrorHandling, unittest.TestCase):
     module = main_bisect
 
-#==============================================================================
 
 class TestDocExample:
     def test_grades(self):
@@ -395,13 +407,12 @@ class TestDocExampleMain(TestDocExample, unittest.TestCase):
 class TestRoots(unittest.TestCase):
     module = main_bisect
 
-    def test_colors(self):
-        f = lambda x: (x**2)-2 < 0
+    def test_sqrt_2(self):
+        f = lambda x: (x ** 2) - 2 < 0
         r1 = main_bisect.bisectf(f, 0, 10, 0.000000001)
         d = (r1 - main_bisect.bisectf(f, 0, 10, Decimal('0.001'))).copy_abs()
         self.assertLessEqual(d, Decimal('0.001'))
 
-#------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     unittest.main()
