@@ -1,3 +1,4 @@
+import functools
 from decimal import Decimal
 
 
@@ -14,28 +15,31 @@ class Interval:
     def len(self):
         return self.right - self.left
 
-    def halflen(self):
+    def half_len(self):
         r = Decimal(self.len) / 2
         if r == 0:
             raise InvalidInterval()
         return r
 
     def left_half(self):
-        return self.__class__(self.left, self.left + self.halflen())
+        return self.__class__(self.left, self.left + self.half_len())
 
     def right_half(self):
-        return self.__class__(self.left + self.halflen(), self.right)
+        return self.__class__(self.left + self.half_len(), self.right)
 
     @property
     def half(self):
-        return self.left + self.halflen()
+        return self.left + self.half_len()
 
     def __str__(self):
         return '<{:f}:{:f}>' % (self.left, self.right)
 
 
 class IntInterval(Interval):
-    def halflen(self):
+    def __init__(self, left, right):
+        super().__init__(int(left), int(right))
+
+    def half_len(self):
         r = self.len // 2
         if r == 0:
             r = 1
@@ -49,53 +53,51 @@ class BisectScanner:
     def __init__(self, f, delta=1):
         self.delta = delta
         self.f = f
+        # self.f = functools.lru_cache(8)(f)
 
     def scan_interval(self, interval):
         # handle degenerated case: ie: extremes match
-        val = self.f(interval.left)
-        if val == self.f(interval.right) and val == True:
-            return interval
-        if val == self.f(interval.right) and val == False:
-            return IntInterval(interval.left, interval.left)
+        if (val := self.f(interval.left)) == self.f(interval.right):
+            if val:
+                return interval
+            else:
+                return IntInterval(interval.left, interval.left)
         return self._scan_interval(interval)
 
     def _scan_interval(self, interval):
         self.steps = 0
+        left = self.f(interval.left)
+        right = self.f(interval.right)
         while interval.len > self.delta:
-            left = self.f(interval.left)
-            right = self.f(interval.right)
             half = self.f(interval.half)
-            print('%05d | %s -- %s -- %s  [%r %r %r] (len:%d)' % (self.steps,
-                                                                  interval.left,
-                                                                  interval.half,
-                                                                  interval.right,
-                                                                  left, half,
-                                                                  right,
-                                                                  interval.len))
-            assert {True, False} == {left == half, right == half}, \
-                "left: (%d)%s  half: (%d)%s  right: (%d)%s" % (interval.left,
-                 left, interval.half, half, interval.right, right)
+            assert {True, False} == {left == half, right == half}, self.state(
+                    interval, left, half, right)
             if left == half:
                 interval = interval.right_half()
+                left = self.f(interval.left)
             elif right == half:
                 interval = interval.left_half()
+                right = self.f(interval.right)
             else:
                 raise InvalidInterval()
             self.steps += 1
         return interval
 
+    def state(self, interval, left, half, right):
+        return ("left: (%d)%s  half: (%d)%s  right: (%d)%s" % (interval.left,
+                left, interval.half, half, interval.right, right))
+
 
 def array_cmp(i, a, x, left=False):
     custom_cmp = lambda _a, _b: _a < _b if left else _a <= _b
     if i < len(a):
-        r = custom_cmp(a[i], x)
-        return r
+        return custom_cmp(a[i], x)
     if i == len(a):
         return False
     return custom_cmp(a[i], x)
 
 
-class MySlice(object):
+class SimpleSliceView(object):
     def __init__(self, a, start, stop=None):
         self.a = a
         self.start = start
@@ -125,7 +127,7 @@ def bisect_list(a, x, left=False):
         return 0
     bs = BisectScanner(lambda i: array_cmp(i, a, x, left=left))
     i = bs.scan_interval(IntInterval(0, len(a)))
-    print('---------->     %r)' % i.right)
+    print('---------->     %r' % i.right)
     return i.right
 
 
@@ -137,7 +139,7 @@ def bisect_right(a, x, lo=0, hi=None, left=False):
     if lo < 0:
         raise ValueError()
     print('<----------  bisect(%r)(%r,%r,%r,%r)' % (left, a, x, lo, hi))
-    return lo + bisect_list(MySlice(a, lo, hi), x, left=left)  # ..(a[lo:hi] ..
+    return lo + bisect_list(SimpleSliceView(a, lo, hi), x, left=left)
 
 
 def bisect_left(a, x, lo=0, hi=None):
