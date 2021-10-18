@@ -1,5 +1,6 @@
 import sys
 import unittest
+from decimal import Decimal
 from test.support import import_helper
 # from test.support import import_fresh_module
 from collections import UserList
@@ -413,6 +414,16 @@ class TestDocExampleC(TestDocExample, unittest.TestCase):
 
 class TestDocExampleEx(TestDocExample, unittest.TestCase):
     module = ex_bisect
+
+
+class TestRoots(unittest.TestCase):
+    module = ex_bisect
+
+    def test_sqrt_2(self):
+        f = lambda x: (x**2)-2 < 0
+        r1 = self.module.bisectf(f, 0, 10, 0.000000001)
+        d = (r1 - self.module.bisectf(f, 0, 10, Decimal('0.001'))).copy_abs()
+        self.assertLessEqual(d, Decimal('0.001'))
 
 
 if __name__ == "__main__":

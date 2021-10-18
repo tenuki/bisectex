@@ -1,5 +1,8 @@
-import functools
 from decimal import Decimal
+
+__all__ = ['BisectScanner', 'IntInterval', 'Interval', 'InvalidInterval',
+           'SimpleSliceView', 'bisect', 'bisect_left', 'bisect_list',
+           'bisect_right', 'bisectf', 'insort', 'insort_left', 'insort_right']
 
 
 class InvalidInterval(Exception):
@@ -53,11 +56,11 @@ class BisectScanner:
     def __init__(self, f, delta=1):
         self.delta = delta
         self.f = f
-        # self.f = functools.lru_cache(8)(f)
 
     def scan_interval(self, interval):
         # handle degenerated case: ie: extremes match
-        if (val := self.f(interval.left)) == self.f(interval.right):
+        val = self.f(interval.left)
+        if val == self.f(interval.right):
             if val:
                 return interval
             else:
@@ -71,7 +74,7 @@ class BisectScanner:
         while interval.len > self.delta:
             half = self.f(interval.half)
             assert {True, False} == {left == half, right == half}, self.state(
-                    interval, left, half, right)
+                interval, left, half, right)
             if left == half:
                 interval = interval.right_half()
                 left = self.f(interval.left)
@@ -85,7 +88,11 @@ class BisectScanner:
 
     def state(self, interval, left, half, right):
         return ("left: (%d)%s  half: (%d)%s  right: (%d)%s" % (interval.left,
-                left, interval.half, half, interval.right, right))
+                                                               left,
+                                                               interval.half,
+                                                               half,
+                                                               interval.right,
+                                                               right))
 
 
 def array_cmp(i, a, x, left=False, key=None):
