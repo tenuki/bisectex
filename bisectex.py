@@ -88,13 +88,14 @@ class BisectScanner:
                 left, interval.half, half, interval.right, right))
 
 
-def array_cmp(i, a, x, left=False):
+def array_cmp(i, a, x, left=False, key=None):
     custom_cmp = lambda _a, _b: _a < _b if left else _a <= _b
+    get_elem = lambda x: x if key is None else key(x)
     if i < len(a):
-        return custom_cmp(a[i], x)
+        return custom_cmp(get_elem(a[i]), get_elem(x))
     if i == len(a):
         return False
-    return custom_cmp(a[i], x)
+    return custom_cmp(get_elem(a[i]), get_elem(x))
 
 
 class SimpleSliceView(object):
@@ -118,44 +119,42 @@ def bisectf(f, lo, hi, delta=Decimal('0.001')):
     return i.right
 
 
-def bisect_list(a, x, left=False):
+def bisect_list(a, x, left=False, key=None):
     if not hasattr(a, '__getitem__'):
         raise TypeError(err_msg % (a.__class__.__name__, '__getitem__'))
     if not hasattr(a, '__len__'):
         raise TypeError(err_msg % (a.__class__.__name__, '__len__'))
     if len(a) == 0:
         return 0
-    bs = BisectScanner(lambda i: array_cmp(i, a, x, left=left))
+    bs = BisectScanner(lambda i: array_cmp(i, a, x, left=left, key=key))
     i = bs.scan_interval(IntInterval(0, len(a)))
-    print('---------->     %r' % i.right)
     return i.right
 
 
-def bisect_right(a, x, lo=0, hi=None, left=False):
+def bisect_right(a, x, lo=0, hi=None, left=False, key=None):
     """basic implementation.
     handle extra indices and index error.
     also support objects which supports not slices.
     """
     if lo < 0:
         raise ValueError()
-    print('<----------  bisect(%r)(%r,%r,%r,%r)' % (left, a, x, lo, hi))
-    return lo + bisect_list(SimpleSliceView(a, lo, hi), x, left=left)
+    return lo + bisect_list(SimpleSliceView(a, lo, hi), x, left=left, key=key)
 
 
-def bisect_left(a, x, lo=0, hi=None):
-    return bisect_right(a, x, lo=lo, hi=hi, left=True)
+def bisect_left(a, x, lo=0, hi=None, key=None):
+    return bisect_right(a, x, lo=lo, hi=hi, left=True, key=key)
 
 
-def insort_left(a, x, lo=0, hi=None):
+def insort_left(a, x, lo=0, hi=None, key=None):
     if not hasattr(a, 'insert'):
         raise TypeError(err_msg % (a.__class__.__name__, 'insert'))
-    return a.insert(bisect_left(a, x, lo, hi), x)
+    return a.insert(bisect_left(a, x, lo, hi, key=key), x)
 
 
-def insort_right(a, x, lo=0, hi=None):
+def insort_right(a, x, lo=0, hi=None, key=None):
     if not hasattr(a, 'insert'):
         raise TypeError(err_msg % (a.__class__.__name__, 'insert'))
-    return a.insert(bisect_right(a, x, lo, hi), x)
+    return a.insert(bisect_right(a, x, lo, hi, key=key), x)
 
 
 insort = insort_right
