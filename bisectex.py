@@ -2,7 +2,7 @@ from decimal import Decimal
 
 __all__ = ['BisectScanner', 'IntInterval', 'Interval', 'InvalidInterval',
            'SimpleSliceView', 'bisect', 'bisect_left', 'bisect_list',
-           'bisect_right', 'bisectf', 'insort', 'insort_left', 'insort_right']
+           'bisect_right', 'bisect_f', 'insort', 'insort_left', 'insort_right']
 
 
 class InvalidInterval(Exception):
@@ -120,7 +120,7 @@ class SimpleSliceView(object):
         return self.a[self.start + idx]
 
 
-def bisectf(f, lo, hi, delta=Decimal('0.001')):
+def bisect_f(f, lo, hi, delta=Decimal('0.001')):
     bs = BisectScanner(f, delta)
     i = bs.scan_interval(Interval(lo, hi))
     return i.right

@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 DESCRIPTION = 'Bisect module also supporting functions'
-LONG_DESCRIPTION = 'Bisect module supporting functions like: bisectf(lambda x: (x**2)-2 < 0, 0, 10, 0.000000001)'
+LONG_DESCRIPTION = 'Bisect module supporting functions like: bisect_f(lambda x: (x**2)-2 < 0, 0, 10, 0.000000001)'
 
 setup(
     name="bisectex",

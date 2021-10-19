@@ -421,8 +421,8 @@ class TestRoots(unittest.TestCase):
 
     def test_sqrt_2(self):
         f = lambda x: (x**2)-2 < 0
-        r1 = self.module.bisectf(f, 0, 10, 0.000000001)
-        d = (r1 - self.module.bisectf(f, 0, 10, Decimal('0.001'))).copy_abs()
+        r1 = self.module.bisect_f(f, 0, 10, 0.000000001)
+        d = (r1 - self.module.bisect_f(f, 0, 10, Decimal('0.001'))).copy_abs()
         self.assertLessEqual(d, Decimal('0.001'))
 
 
