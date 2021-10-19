@@ -120,7 +120,7 @@ class SimpleSliceView(object):
         return self.a[self.start + idx]
 
 
-def bisect_f(f, lo, hi, delta=Decimal('0.001')):
+def bisect_f(f, lo, hi, delta=1):
     bs = BisectScanner(f, delta)
     i = bs.scan_interval(Interval(lo, hi))
     return i.right
